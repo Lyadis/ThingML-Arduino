@@ -1,0 +1,49 @@
+/**
+This is the ThingML hello world example!
+It basically prints Hello World! and then Bye.
+You can see that this thing is Platform-Independent: we are not using any arduino code here
+*/
+
+import "../../lib/_Arduino.thingml"
+
+thing HelloThing includes ArduinoMsgs {
+
+	required port arduino
+	@sync_send "true"
+	{
+		sends serial_print_str
+	}
+	
+	statechart HelloWorld init Greetings {
+	
+		state Greetings {
+			
+			transition -> Bye 
+			action do
+				print "Hello World!\n"
+				arduino!serial_print_str("Hello World!\n")
+			end
+			
+		}
+	
+		state Bye {
+			on entry print "Bye.\n"
+		}
+	
+	}
+}
+
+/**
+TODO: compile and run this configuration for the  Arduino
+Right-click on this file (in the Project Explorer on the left) and try:
+ThingML -> Compile Arduino
+**/
+configuration HelloCfg 
+@arduino_stdout "Serial" //You need to specify the standard output of print
+{
+
+	instance my_controller: HelloThing
+	instance my_arduino: Arduino
+	connector my_controller.arduino => my_arduino.arduino
+	
+}

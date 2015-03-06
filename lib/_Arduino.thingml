@@ -1,0 +1,326 @@
+import "_Datatypes.thingml"
+
+
+enumeration PinMode 
+	@java_type "byte"
+    @c_byte_size "1"
+	@c_type "uint8_t"
+{
+	INPUT @enum_val "0"
+	OUTPUT @enum_val "1"
+}
+
+enumeration DigitalPin 
+	@java_type "byte"
+    @c_byte_size "1"
+	@c_type "uint8_t"
+{
+	PIN_0 @enum_val "0"
+	PIN_1 @enum_val "1"
+	PIN_2 @enum_val "2"
+	PIN_3 @enum_val "3"
+	PIN_4 @enum_val "4"
+	PIN_5 @enum_val "5"
+	PIN_6 @enum_val "6"
+	PIN_7 @enum_val "7"
+	PIN_8 @enum_val "8"
+	PIN_9 @enum_val "9"
+	PIN_10 @enum_val "10"
+	PIN_11 @enum_val "11"
+	PIN_12 @enum_val "12"
+	PIN_13 @enum_val "13"
+	A_0 @enum_val "14"
+	A_1 @enum_val "15"
+	A_2 @enum_val "16"
+	A_3 @enum_val "17"
+	A_4 @enum_val "18"
+	A_5 @enum_val "19"
+}
+
+enumeration PWMPin 
+	@java_type "byte"
+    @c_byte_size "1"
+	@c_type "uint8_t"
+{
+	PWM_PIN_3 @enum_val "3"
+	PWM_PIN_5 @enum_val "5"
+	PWM_PIN_6 @enum_val "6"
+	PWM_PIN_9 @enum_val "9"
+	PWM_PIN_10 @enum_val "10"
+	PWM_PIN_11 @enum_val "11"
+}
+
+
+enumeration AnalogPin 
+	@java_type "byte"
+    @c_byte_size "1"
+	@c_type "uint8_t"
+{
+	A_0 @enum_val "14"
+	A_1 @enum_val "15"
+	A_2 @enum_val "16"
+	A_3 @enum_val "17"
+	A_4 @enum_val "18"
+	A_5 @enum_val "19"
+}
+
+enumeration AnalogReference 
+	@java_type "byte"
+	@c_type "uint8_t"
+{
+	DEFAULT @enum_val "1"
+	INTERNAL @enum_val "3"
+	EXTERNAL @enum_val "0"
+}
+
+enumeration InterruptPin 
+	@java_type "byte"
+    @c_byte_size "1"
+	@c_type "uint8_t"
+{
+	PIN_2_INT0 @enum_val "0"
+	PIN_3_INT1 @enum_val "1"
+}
+
+enumeration InterruptTrigger 
+	@java_type "byte"
+    @c_byte_size "1"
+	@c_type "uint8_t"
+{
+	CHANGE @enum_val "1"
+	RISING @enum_val "3"
+	FALLING @enum_val "2"
+	LOW @enum_val "0"
+}
+	
+thing ArduinoMsgs {
+
+	message 4ms_interrupt();
+	message 100ms_interrupt();
+	message 1s_poll();
+	
+	message timeout(id : UInt8);
+	message timer_start(id: UInt8, time: Integer);
+	message timer_cancel(id : UInt8);
+	
+	message serial_print_str(str: String);
+	message serial_print_dec(num: Double);
+    message serial_print_num(num: Integer);
+    
+    message usb_print_str(str: String);
+	message usb_print_dec(num: Double);
+    message usb_print_num(num: Integer);
+    
+    message serial_rx_char(c : Char);
+    message usb_rx_char(c : Char);
+    
+    // Digital I/O
+	message pin_mode (pin : DigitalPin, mode : PinMode) @code "2";
+	message digital_write (pin : DigitalPin, value : DigitalState) @code "3";
+	message digital_read (pin : DigitalPin) @code "4"
+		@sync_response "digitalReadResult#value" @timeout "500" @retry "0";
+	message digital_read_result (pin : DigitalPin, value : DigitalState) @code "5";
+	
+	// Analog I/O
+	message analog_reference (type : AnalogReference) @code "6";
+	message analog_read (pin : AnalogPin) @code "7" 
+		@sync_response "analogReadResult#value" @timeout "500" @retry "0";
+	message analog_read_result (pin : AnalogPin, value : Int16) @code "8";
+	message analog_write (pin : PWMPin, value : UInt8) @code "9";
+	
+	// Advanced I/O
+	message tone (pin : DigitalPin, frequency : Int16, duration : Int16) @code "10";
+	message no_tone (pin : DigitalPin) @code "11";
+	
+	// Simple Ping
+	message ping () @code "66"
+		@sync_ack "pong" @timeout "1000" @retry "3" ;
+	message pong () @code "67";
+}
+
+
+thing Arduino includes ArduinoMsgs, ThingMLSchedulerMsg 
+@c_header "
+#define NB_SOFT_TIMERS 4 // for 4 different timers, 0 to 3. change here to get more or less timers.
+"
+@c_global "
+struct YunScheduler_Instance *_YunScheduler_instance;
+uint8_t interrupt_counter = 0;
+"
+{
+
+	provided port arduino
+	@sync_send "true" // Do not queue messages to make sure interrupts are executed right away.
+	{
+		sends 4ms_interrupt, 100ms_interrupt, 1s_poll
+		
+		receives timer_start, timer_cancel
+		sends timeout
+		
+		receives serial_print_str, serial_print_dec, serial_print_num
+		sends serial_rx_char
+		
+		receives usb_print_str, usb_print_dec, usb_print_num
+		sends usb_rx_char
+		
+		// Digital I/O
+		receives pin_mode
+		receives digital_write
+		receives digital_read
+		sends digital_read_result
+		
+		// Analog I/O
+		receives analog_reference
+		receives analog_read
+		sends analog_read_result
+		receives analog_write
+		
+		// Advanced I/O
+		receives tone
+		receives no_tone
+		
+		// Simple Ping
+		receives ping
+		sends pong
+	}
+	/**
+	required port polling {
+		receives setup, poll
+	}*/
+	
+	property interrupt_counter : UInt8 = 0
+	
+	/**
+	function initialize_timer3() do
+		'// Store the instance in a global variable so that the interrupt routine can use it
+		 _YunScheduler_instance = _instance;
+		 
+		 // Run timer3 interrupt up counting at 16MHz 
+		 TCCR3A = 0;
+		 TCCR3B = 0<<CS32 | 0<<CS31 | 1<<CS30;
+		
+		 //Timer3 Overflow Interrupt Enable
+		 TIMSK3 |= 1<<TOIE3;'
+	end
+	
+	
+	function timer3_compare_interrupt() 
+	@c_prototype "SIGNAL(TIMER3_OVF_vect)"
+	@c_instance_var_name "_YunScheduler_instance"
+	do
+		'TCNT3 = 1535;'
+		'interrupt_counter++;'
+		if ('interrupt_counter >= 24') do 
+			arduino!100ms_interrupt()
+			'interrupt_counter=0;'
+		end
+		arduino!4ms_interrupt()
+	end
+	*/
+	
+	statechart ArduinoSchedulerStateChart init ACTIVE {
+
+		property timers : Long['NB_SOFT_TIMERS'] 
+		property prev_1sec : Long
+
+		/**
+		internal event polling?setup action do
+			'Serial1.begin(9600);'
+			'Serial.begin(9600);'
+			initialize_timer3()
+			prev_1sec = 'millis()' + 1000
+		end
+		internal event polling?poll action do
+			var tms : Long = 'millis()'
+			// Handle timers
+			var t : UInt8 = 0
+			while (t < 'NB_SOFT_TIMERS') do
+				if (timers[t] > 0 and timers[t] < tms) do 
+					timers[t] = 0 
+					arduino!timeout(t) 
+				end
+				t = t + 1
+			end
+			// Handle the 1s poll
+			if (prev_1sec < tms) do
+				prev_1sec = prev_1sec + 1000
+				arduino!1s_poll()
+			end
+			// Handle serial rx
+			if ('Serial1.available()' > 0) arduino!serial_rx_char('(char)Serial1.read()')
+			if ('Serial.available()' > 0) arduino!usb_rx_char('(char)Serial.read()')
+		end
+		
+		internal event e : arduino?timer_start action do
+			if(e.id < 'NB_SOFT_TIMERS') timers[e.id] = 'millis()' + e.time - 1 
+		end
+		
+		internal event e : arduino?timer_cancel action do
+			if(e.id < 'NB_SOFT_TIMERS') timers[e.id] = 0
+		end
+		*/
+		internal event e : arduino?serial_print_str action do
+			'Serial.print('&e.str&');'
+		end
+		
+		internal event e : arduino?serial_print_dec action do
+			'Serial.print('&e.num&');'
+		end
+		
+		internal event e : arduino?serial_print_num action do
+			'Serial.print('&e.num&');'
+		end
+        
+        internal event m : arduino?pin_mode 
+        action 'pinMode(' & m.pin & ', '& m.mode &');'
+        
+        internal event m : arduino?digital_write 
+        action 'digitalWrite(' & m.pin & ', '& m.value &');'
+        
+        internal event m : arduino?digital_read 
+        action arduino!digital_read_result(m.pin, 'digitalRead(' & m.pin &')')
+        
+        internal event m : arduino?analog_reference 
+        action 'analogReference(' & m.type & ');'
+        
+        internal event m : arduino?analog_read 
+        action arduino!analog_read_result(m.pin, 'analogRead(' & m.pin &')')
+        
+        internal event m : arduino?analog_write 
+        action 'analogWrite(' & m.pin & ', '& m.value &');'
+        
+        internal event m : arduino?tone 
+        action 'tone(' & m.pin & ', '& m.frequency & ', '& m.duration &');'
+        
+        internal event m : arduino?no_tone 
+        action 'noTone(' & m.pin & ');'
+            
+        internal event m : arduino?ping 
+        action arduino!pong()
+		
+		state ACTIVE {
+			on entry do
+				'Serial.begin(9600);'
+			end
+		}
+
+	}
+}
+
+thing fragment arduinoApplication includes ArduinoMsgs, ThingMLSchedulerMsg {
+	required port arduino
+	@sync_send "true" // Do not queue messages to make sure timers are updated right away.
+	{
+		//receives setup, poll
+		receives 4ms_interrupt, 100ms_interrupt, 1s_poll
+		
+		sends timer_start, timer_cancel
+		receives timeout
+		
+		sends serial_print_str, serial_print_dec, serial_print_num
+		receives serial_rx_char
+		
+		sends usb_print_str, usb_print_dec, usb_print_num
+		receives usb_rx_char
+	}
+}
