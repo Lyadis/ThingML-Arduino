@@ -41,7 +41,14 @@ enumeration DigitalState
 datatype Int16	
 	@c_type "int"
     @c_byte_size "2";
-	
+
+enumeration DigitalState 
+  @c_type "uint8_t"
+  @c_byte_size "1"
+{
+  LOW @enum_val "0"
+  HIGH @enum_val "1"
+}
 	
 thing fragment ThingMLSchedulerMsg {
 	message setup();

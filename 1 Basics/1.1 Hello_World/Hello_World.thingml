@@ -3,7 +3,6 @@ This is the ThingML hello world example!
 It basically prints Hello World! and then Bye.
 You can see that this thing is Platform-Independent: we are not using any arduino code here
 */
-
 import "../../lib/_Arduino.thingml"
 
 thing HelloThing includes ArduinoMsgs {

@@ -1,0 +1,31 @@
+import "../../lib/_Arduin_proto.thingml"
+
+configuration ArduinoSketchCfg {
+	instance arduinoScheduler:  ArduinoScheduler
+	instance application: ArduinoSketch
+	connector application.arduino => arduinoScheduler.arduino
+}
+
+thing ArduinoSketch includes ArduinoApplication
+{
+	
+	readonly property LED : UInt8 = 8
+	
+	//function setOutput(pin : UInt8) 'pinMode('&pin&', OUTPUT);'
+	//function setInput(pin : UInt8) 'pinMode('&pin&', INPUT);'
+	
+	//function setDigitalHigh(pin : UInt8) 'digitalWrite('&pin&', HIGH);'
+	//function setDigitalLow(pin : UInt8) 'digitalWrite('&pin&', LOW);'
+
+	statechart ArduinoTimerStateChart init OFF {
+
+		on entry arduino!setOutput(LED)
+
+		state OFF {
+			on entry arduino!setDigitalHigh(LED)
+			transition -> Done 
+		}
+		state Done {
+		}
+	}
+}
