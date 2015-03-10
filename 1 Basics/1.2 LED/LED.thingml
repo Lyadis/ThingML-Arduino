@@ -1,28 +1,32 @@
+/**
+file: LED.thingml
+result:	Once compiled and executed this will light a LED plugged in the slot 8
+HardWare required: 	Arduino Uno compatible board
+					a LED
+TODO: compile and run this configuration for the  Arduino
+Right-click on this file (in the Project Explorer on the left) and try:
+ThingML -> Compile Arduino
+*/
+
 import "../../lib/_Arduin_proto.thingml"
 
 configuration ArduinoSketchCfg {
-	instance arduinoScheduler:  ArduinoScheduler
-	instance application: ArduinoSketch
+	instance arduinoScheduler :  ArduinoScheduler
+	instance application : ArduinoSketch
 	connector application.arduino => arduinoScheduler.arduino
 }
 
 thing ArduinoSketch includes ArduinoApplication
 {
 	
-	readonly property LED : UInt8 = 8
-	
-	//function setOutput(pin : UInt8) 'pinMode('&pin&', OUTPUT);'
-	//function setInput(pin : UInt8) 'pinMode('&pin&', INPUT);'
-	
-	//function setDigitalHigh(pin : UInt8) 'digitalWrite('&pin&', HIGH);'
-	//function setDigitalLow(pin : UInt8) 'digitalWrite('&pin&', LOW);'
+	readonly property LED : UInt8 = 8 // pin where the LED is plugged
 
 	statechart ArduinoTimerStateChart init OFF {
 
-		on entry arduino!setOutput(LED)
+		on entry arduino!setOutput(LED) // setup
 
 		state OFF {
-			on entry arduino!setDigitalHigh(LED)
+			on entry arduino!setDigitalHigh(LED) // turn the LED on
 			transition -> Done 
 		}
 		state Done {

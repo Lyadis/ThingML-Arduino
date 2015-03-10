@@ -1,13 +1,16 @@
 /**
-This is the ThingML hello world example!
-It basically prints Hello World! and then Bye.
-You can see that this thing is Platform-Independent: we are not using any arduino code here
+file: Hello_World.thingml
+result:	Once compiled and executed this will display "Hello World!" then "Bye." on the serial output of your arduino
+HardWare required: Arduino Uno compatible board
+TODO: compile and run this configuration for the  Arduino
+Right-click on this file (in the Project Explorer on the left) and try:
+ThingML -> Compile Arduino
 */
-import "../../lib/_Arduino.thingml"
+import "../../lib/_Arduin_proto.thingml"
 
-thing HelloThing includes ArduinoMsgs {
+thing HelloThing includes ArduinoMsgs { //TOCHANGE includes ArduinoApp
 
-	required port arduino
+	required port arduino // All specific arduino instruction like input/output handling will be send on this port
 	@sync_send "true"
 	{
 		sends serial_print_str
@@ -19,30 +22,24 @@ thing HelloThing includes ArduinoMsgs {
 			
 			transition -> Bye 
 			action do
-				print "Hello World!\n"
-				arduino!serial_print_str("Hello World!\n")
+				arduino!serial_print_str("Hello World!\n")// Here is a basic instruction for the arduino, it will print the argument string on the serial port.
 			end
 			
 		}
 	
 		state Bye {
-			on entry print "Bye.\n"
+			on entry arduino!serial_print_str("Bye.\n")
 		}
 	
 	}
 }
 
-/**
-TODO: compile and run this configuration for the  Arduino
-Right-click on this file (in the Project Explorer on the left) and try:
-ThingML -> Compile Arduino
-**/
 configuration HelloCfg 
 @arduino_stdout "Serial" //You need to specify the standard output of print
 {
 
 	instance my_controller: HelloThing
-	instance my_arduino: Arduino
+	instance my_arduino: ArduinoScheduler
 	connector my_controller.arduino => my_arduino.arduino
 	
 }
