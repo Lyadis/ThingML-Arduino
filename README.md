@@ -5,7 +5,7 @@ Shorts tutorials to getting started with ThingML over Arduino Uno
 ###1 Basics
 ####1.1 Hello World on the serial port
 ####1.2 LED (Digital Output)
-####1.2 Timer
+####1.3 Timer
 ####1.4 Simple Button (Digital Input)
 ####1.5 Sensor (Analogic Input)
 
