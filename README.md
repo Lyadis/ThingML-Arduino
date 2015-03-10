@@ -20,32 +20,32 @@ Most arduino specific feature will be used via messeges over the arduino port of
 
 ###Time relative message
 ####receives 
-4ms_interrupt
-100ms_interrupt
-1s_poll
-timeout(id : UInt8)
+*4ms_interrupt
+*100ms_interrupt
+*1s_poll
+*timeout(id : UInt8)
 
 ####sends 
-timer_start(id : UInt8, time: Integer)
-timer_cancel(id : UInt8)
+*timer_start(id : UInt8, time: Integer)
+*timer_cancel(id : UInt8)
 
 ###Serial port relative message
 ####sends 
-serial_print_str(msg: String)
-serial_print_dec(num: Double)
-serial_print_num(num: Integer)
+*serial_print_str(msg: String)
+*serial_print_dec(num: Double)
+*serial_print_num(num: Integer)
 ####receives 
-serial_rx_char(c : Char)
+*serial_rx_char(c : Char)
 
 ###Pin relative message
 ####sends 
-setDigitalHigh(pin : UInt8)
-setDigitalLow(pin : UInt8)
-setOutput(pin : UInt8)
-setInput(pin : UInt8)
-readDigital(pin : UInt8)
-readAnalog(pin : UInt8)
+*setDigitalHigh(pin : UInt8)
+*setDigitalLow(pin : UInt8)
+*setOutput(pin : UInt8)
+*setInput(pin : UInt8)
+*readDigital(pin : UInt8)
+*readAnalog(pin : UInt8)
 
 ####receives 
-readDigitalResponse(DigitalState : DigitalState)
-readAnalogResponse(res : Int16)
+*readDigitalResponse(DigitalState : DigitalState)
+*readAnalogResponse(res : Int16)
