@@ -1,0 +1,47 @@
+/**
+file: Blink100ms.thingml
+result:	Once compiled and executed this will turn a LED on while the button is pressed
+HardWare required: 	Arduino Uno compatible board
+					a LED
+					a button
+TODO: compile and run 
+TODO: Modify this code to have an application which change the state of the LED every time the button is pressed
+*/
+
+import "../../lib/_Arduin_proto.thingml"
+
+configuration ArduinoSketchCfg {
+	instance arduinoScheduler:  ArduinoScheduler
+	instance application: ButtonSketch
+	connector application.arduino => arduinoScheduler.arduino
+}
+
+thing ButtonSketch includes ArduinoApplication
+{
+	
+	readonly property LED : UInt8 = 7
+	readonly property Button : UInt8 = 6
+	property ButtonState : DigitalState = DigitalState:LOW
+
+	statechart ArduinoTimerStateChart init Idle {
+
+		on entry do
+			arduino!setOutput(LED)
+			arduino!setInput(Button)
+		end
+
+		state Idle {
+			on entry arduino!readDigital(Button)
+			transition -> Idle event arduino?100ms_interrupt
+			
+			internal event e : arduino?readDigitalResponse action do
+				if (e.DigitalState == DigitalState:HIGH) do
+					arduino!setDigitalHigh(LED)
+				end
+				if (e.DigitalState == DigitalState:LOW) do
+					arduino!setDigitalLow(LED)
+				end
+			end
+		}
+	}
+}

@@ -1,0 +1,37 @@
+/**
+file: Blink100ms.thingml
+result:	Once compiled and executed this will turn a LED on and off every 100ms
+HardWare required: 	Arduino Uno compatible board
+					a LED
+					a button (not necessary to run)
+TODO: compile and run 
+TODO: chronometer: write a chronometer which start when the button is pressed and stop when pressed again
+*/
+
+import "../../lib/_Arduin_proto.thingml"
+
+configuration ArduinoSketchCfg {
+	instance arduinoScheduler:  ArduinoScheduler
+	instance application: ArduinoSketch
+	connector application.arduino => arduinoScheduler.arduino
+}
+
+thing ArduinoSketch includes ArduinoApplication
+{
+	
+	readonly property LED : UInt8 = 8
+
+	statechart ArduinoTimerStateChart init OFF {
+
+		on entry arduino!setOutput(LED) // init
+
+		state OFF {
+			on entry arduino!setDigitalHigh(LED)
+			transition -> ON event arduino?100ms_interrupt //handeling of the arduino 100ms interrupt
+		}
+		state ON {
+			on entry arduino!setDigitalLow(LED)
+			transition -> OFF event arduino?100ms_interrupt
+		}
+	}
+}
