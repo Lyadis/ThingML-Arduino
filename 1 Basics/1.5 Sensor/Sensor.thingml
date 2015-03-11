@@ -9,7 +9,7 @@ TODO: Modify this code to hove an application which turn a led on when the senso
 	  Change the refreshing rate to be 4ms
 */
 
-import "../../lib/_Arduin_proto.thingml"
+import "../../lib/_Arduino.thingml"
 
 configuration ArduinoSketchCfg {
 	instance arduinoScheduler:  ArduinoScheduler
@@ -20,11 +20,11 @@ configuration ArduinoSketchCfg {
 thing SensorSketch includes ArduinoApplication
 {
 	
-	readonly property Sensor : UInt8 = 1
+	readonly property Sensor : UInt8 = 0
 
 	statechart ArduinoTimerStateChart init Idle {
 
-
+		on entry arduino!setInput(Sensor)
 		state Idle {
 			on entry do
 				arduino!readAnalog(Sensor)

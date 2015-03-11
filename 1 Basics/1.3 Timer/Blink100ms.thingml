@@ -8,7 +8,7 @@ TODO: compile and run
 TODO: chronometer: write a chronometer which start when the button is pressed and stop when pressed again
 */
 
-import "../../lib/_Arduin_proto.thingml"
+import "../../lib/_Arduino.thingml"
 
 configuration ArduinoSketchCfg {
 	instance arduinoScheduler:  ArduinoScheduler

@@ -8,7 +8,7 @@ Right-click on this file (in the Project Explorer on the left) and try:
 ThingML -> Compile Arduino
 */
 
-import "../../lib/_Arduin_proto.thingml"
+import "../../lib/_Arduino.thingml"
 
 configuration ArduinoSketchCfg {
 	instance arduinoScheduler :  ArduinoScheduler

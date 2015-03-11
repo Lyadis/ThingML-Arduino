@@ -8,7 +8,7 @@ TODO: compile and run
 TODO: Modify this code to have an application which change the state of the LED every time the button is pressed
 */
 
-import "../../lib/_Arduin_proto.thingml"
+import "../../lib/_Arduino.thingml"
 
 configuration ArduinoSketchCfg {
 	instance arduinoScheduler:  ArduinoScheduler

@@ -1,4 +1,4 @@
-import "_Arduin_proto.thingml"
+import "_Arduino.thingml"
 
 thing Adafruit_RGBLCDShieldMsgs {
 

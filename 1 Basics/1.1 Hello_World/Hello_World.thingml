@@ -6,16 +6,10 @@ TODO: compile and run this configuration for the  Arduino
 Right-click on this file (in the Project Explorer on the left) and try:
 ThingML -> Compile Arduino
 */
-import "../../lib/_Arduin_proto.thingml"
+import "../../lib/_Arduino.thingml"
 
-thing HelloThing includes ArduinoMsgs { //TOCHANGE includes ArduinoApp
+thing HelloThing includes ArduinoApplication { 
 
-	required port arduino // All specific arduino instruction like input/output handling will be send on this port
-	@sync_send "true"
-	{
-		sends serial_print_str
-	}
-	
 	statechart HelloWorld init Greetings {
 	
 		state Greetings {
@@ -35,7 +29,6 @@ thing HelloThing includes ArduinoMsgs { //TOCHANGE includes ArduinoApp
 }
 
 configuration HelloCfg 
-@arduino_stdout "Serial" //You need to specify the standard output of print
 {
 
 	instance my_controller: HelloThing
