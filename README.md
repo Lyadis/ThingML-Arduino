@@ -15,6 +15,15 @@ Shorts tutorials to getting started with ThingML over Arduino Uno
 
 ###lib
 
+## Architecture
+------------------      --------------------
+|   Application  |      |   Arduino Layer  |
+------------------      --------------------
+|                |      |                  |
+|    port arduino|------|port arduino      |
+|                |      |                  |
+------------------      --------------------
+
 ##ArduinoMsgs
 Most arduino specific feature will be used via messeges over the arduino port of ArduinoApp.
 
