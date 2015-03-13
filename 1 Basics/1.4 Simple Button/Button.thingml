@@ -31,7 +31,7 @@ thing ButtonSketch includes ArduinoApplication
 	readonly property Button : UInt8 = 6
 	property ButtonState : DigitalState = DigitalState:LOW
 
-	statechart ArduinoTimerStateChart init Idle {
+	statechart ArduinoTimerStateChart init Setup {
 		state Setup { /**
 						This state is not always usefull, most of the time, not writing it will not change any thing.
 						It guarentee the Arduino abstraction layer is already initialized when we start runnin our application
