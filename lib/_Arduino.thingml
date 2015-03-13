@@ -1,7 +1,8 @@
 import "_Datatypes.thingml"
 	
 thing ArduinoMsgs {
-
+	
+	message ready();
 	message 4ms_interrupt();
 	message 100ms_interrupt();
 	message 1s_poll();
@@ -28,10 +29,10 @@ thing ArduinoMsgs {
 	message setInput(pin : UInt8);
 	
 	message readDigital(pin : UInt8);
-	message readDigitalResponse(DigitalState : DigitalState);
+	message readDigitalResponse(pin : UInt8, DigitalState : DigitalState);
 	
 	message readAnalog(pin : UInt8);
-	message readAnalogResponse(res : Int16);
+	message readAnalogResponse(pin : UInt8, res : Int16);
 }
 
 
@@ -48,6 +49,8 @@ uint8_t interrupt_counter = 0;
 	provided port arduino
 	@sync_send "true" // Do not queue messages to make sure interrupts are executed right away.
 	{
+		sends ready
+		
 		sends 4ms_interrupt, 100ms_interrupt, 1s_poll
 		
 		receives timer_start, timer_cancel
@@ -135,6 +138,7 @@ uint8_t interrupt_counter = 0;
 			//'pinMode(7, OUTPUT);'
 			initialize_timer1()
 			prev_1sec = 'millis()' + 1000
+			arduino!ready()
 		end
 		
 		internal event polling?poll action do
@@ -207,17 +211,17 @@ uint8_t interrupt_counter = 0;
 		
 		internal event e : arduino?readDigital action do
 			if ('(digitalRead('&e.pin&') == HIGH)') do
-				arduino!readDigitalResponse(DigitalState:HIGH)
+				arduino!readDigitalResponse(e.pin, DigitalState:HIGH)
 				
 			end
 			if ('(digitalRead('&e.pin&') == LOW)') do
-				arduino!readDigitalResponse(DigitalState:LOW)
+				arduino!readDigitalResponse(e.pin, DigitalState:LOW)
 				
 			end
 		end
 		
 		internal event e : arduino?readAnalog action do
-			arduino!readAnalogResponse('analogRead('&e.pin&')')
+			arduino!readAnalogResponse(e.pin, 'analogRead('&e.pin&')')
 		end
 		
 		state ACTIVE {}
@@ -229,6 +233,8 @@ thing fragment ArduinoApplication includes ArduinoMsgs, ThingMLSchedulerMsg {
 	required port arduino 
 	@sync_send "true" // Do not queue messages to make sure timers are updated right away.
 	{
+		
+		receives ready
 		//receives setup, poll
 		receives 4ms_interrupt, 100ms_interrupt, 1s_poll
 		

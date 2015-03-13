@@ -43,10 +43,7 @@ thing ArduinoSketch includes Adafruit_1_8pLCDShieldClient, snakeListClient
 	
 	statechart ArduinoSketchStateChart init Empty {
 		state Empty {
-			transition -> Empty2
-		}
-		state Empty2 {
-			transition -> Menu
+			transition -> Menu event lcd?LCDready
 		}
 		state Menu {
 			on entry do

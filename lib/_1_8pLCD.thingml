@@ -1,7 +1,8 @@
 import "_Arduino.thingml"
 
 thing Adafruit_1_8pLCDShieldMsgs {
-
+	
+	message LCDready();
 	message button_state();
 	message button_state_response(bstate : UInt8);
 	message button_state_change(bstate : UInt8);
@@ -29,6 +30,7 @@ thing fragment Adafruit_1_8pLCDShieldClient includes Adafruit_1_8pLCDShieldMsgs,
 	@sync_send "true" // Do not queue thos message, send them directly to the LCD. We should not send them from interrupt routines. 
 	{
 		sends print_num, print_dec, print_str, clear, set_cursor, set_bgcolor, fillRect, drawRect
+		receives LCDready
 	}
 	
 }
@@ -38,6 +40,7 @@ thing fragment simpleLCDClient includes Adafruit_1_8pLCDShieldMsgs, ArduinoMsgs,
 	@sync_send "true" // Do not queue thos message, send them directly to the LCD. We should not send them from interrupt routines. 
 	{
 		sends print_num, print_dec, print_str, clear, set_cursor, set_bgcolor, fillRect, drawRect
+		receives LCDready
 	}
 }
 
@@ -58,9 +61,10 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 {
 
 	required port arduino 
+	@sync_send "true"
 	{
-		sends setInput, readAnalog
-		receives 100ms_interrupt, readAnalogResponse
+		sends setInput, readAnalog, serial_print_str
+		receives 100ms_interrupt, readAnalogResponse, ready
 	}
 
 	provided port button
@@ -72,6 +76,7 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 	
 	provided port lcd {
 		receives print_num, print_dec, print_str, clear, set_cursor, set_bgcolor, fillRect, drawRect
+		sends LCDready
 	}
 
 
@@ -86,18 +91,20 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 			//tft.setTextColor(0xFFFF);'
 		end
 		state Empty {
-			transition -> Setup
+			transition -> Setup event e : arduino?ready
 		}
 		
 		state Setup {
 		on entry do
-			print("LCD Init\n")
 			arduino!setInput(bpin)
 			'tft.initR(INITR_BLACKTAB);
 			tft.fillScreen(0x0000);
 			tft.setTextColor(0xFFFF);'
 		end
-			transition -> Idle
+			transition -> Idle action do
+			arduino!serial_print_str("[LCD shield] Ready\n")
+			lcd!LCDready()
+			end
 		}
 		
 		

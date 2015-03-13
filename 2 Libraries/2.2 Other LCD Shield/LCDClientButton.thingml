@@ -3,24 +3,35 @@ import "../../lib/_1_8pLCD.thingml"
 configuration ArduinoSketchCfg {
     
     instance application: ArduinoSketch	
-    instance arduinoScheduler:  ArduinoScheduler
 	instance lcd : Adafruit_1_8pLCDShieldShield
-	connector lcd.arduino => arduinoScheduler.arduino
+    instance arduinoScheduler:  ArduinoScheduler
 	connector application.button => lcd.button
 	connector application.lcd => lcd.lcd
 	connector application.arduino => arduinoScheduler.arduino
+	connector lcd.arduino => arduinoScheduler.arduino
 }
 
 thing ArduinoSketch includes Adafruit_1_8pLCDShieldClient
 
 {
 	
-	statechart ArduinoSketchStateChart init OFF {
-
+	statechart ArduinoSketchStateChart init Init {
+		state Init {
+			transition -> OFF event e : lcd?LCDready
+		}
 
 		state OFF {
 			on entry do
-				arduino!serial_print_str("Snake Init\n")
+				arduino!serial_print_str("[Client] LCD Init\n")
+                lcd!clear()
+                
+			end
+			transition -> DrawRect
+		}
+		state DrawRect {
+			on entry do
+				arduino!serial_print_str("[Client] DrawRect\n")
+				lcd!drawRect(1,1,126,158,'0xFFFF')
 			end
 			transition -> ON
 		}
@@ -31,11 +42,10 @@ thing ArduinoSketch includes Adafruit_1_8pLCDShieldClient
                 arduino!serial_print_num(e.bstate)
                 arduino!serial_print_str("\n")
                 
-                lcd!clear()
-                lcd!drawRect(1,1,126,158,'0xFFFF')
-                //lcd!set_cursor(0,0)
-                //lcd!print_str("Button: ")
-                //lcd!print_num(e.bstate)
+                lcd!fillRect(10,10,100,10, '0x0000')
+                lcd!set_cursor(10,10)
+                lcd!print_str("Button: ")
+                lcd!print_num(e.bstate)
             end   
 		}
 	}

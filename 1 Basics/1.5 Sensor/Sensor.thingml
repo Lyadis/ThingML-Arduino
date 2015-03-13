@@ -31,7 +31,7 @@ thing SensorSketch includes ArduinoApplication
 			end
 			transition -> Idle event arduino?100ms_interrupt
 			
-			internal event e : arduino?readAnalogResponse action do
+			internal event e : arduino?readAnalogResponse guard (e.pin == Sensor) action do
 				arduino!serial_print_str("Sensor value: ")
 				arduino!serial_print_num(e.res)
 				arduino!serial_print_str("\n")

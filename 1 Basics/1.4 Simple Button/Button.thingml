@@ -34,7 +34,7 @@ thing ButtonSketch includes ArduinoApplication
 			on entry arduino!readDigital(Button)
 			transition -> Idle event arduino?100ms_interrupt
 			
-			internal event e : arduino?readDigitalResponse action do
+			internal event e : arduino?readDigitalResponse guard (e.pin == Button) action do
 				if (e.DigitalState == DigitalState:HIGH) do
 					arduino!setDigitalHigh(LED)
 				end
