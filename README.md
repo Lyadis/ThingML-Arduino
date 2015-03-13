@@ -47,5 +47,5 @@ Most arduino specific feature will be used via messeges over the arduino port of
 * readAnalog(pin : UInt8)
 
 ####receives 
-* readDigitalResponse(DigitalState : DigitalState)
-* readAnalogResponse(res : Int16)
+* readDigitalResponse(pin : UInt8, DigitalState : DigitalState)
+* readAnalogResponse(pin : UInt8, res : Int16)
