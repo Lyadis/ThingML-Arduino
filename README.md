@@ -34,8 +34,6 @@ Most arduino specific feature will be used via messeges over the arduino port of
 * serial_print_str(msg: String)
 * serial_print_dec(num: Double)
 * serial_print_num(num: Integer)
-####receives 
-* serial_rx_char(c : Char)
 
 ###Pin relative message
 ####sends 
