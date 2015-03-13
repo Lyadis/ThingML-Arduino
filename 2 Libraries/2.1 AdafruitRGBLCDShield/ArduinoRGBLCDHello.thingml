@@ -1,3 +1,18 @@
+/**
+File: ArduinoRGBLCDHello.thingml
+
+Result:	Allows you to test your shield
+
+HardWare required: 	Arduino Uno compatible board
+					an adafru.it RGBLCD 2x16 shield
+					
+Feature taken up: 	- library
+					
+TODO: compile and run 
+
+TODO: your own app using this shield
+*/
+
 import "../../lib/_RGBLCDShield.thingml"
 
 configuration ArduinoSketchCfg {

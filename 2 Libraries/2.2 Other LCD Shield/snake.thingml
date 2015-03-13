@@ -1,10 +1,27 @@
+/**
+File: snake.thingml
+
+Result: Snake game
+
+HardWare required: 	Arduino Uno compatible board
+					an adafru.it shield LCD 1.8" with joystick
+					
+Feature taken up: 	- lib
+					- an example of poor not well thought out data structure for arduino in snakeList/_snakeList.thingml
+					- an example of listner on button's change
+					
+TODO: compile and run 
+
+TODO: your own app
+*/
+
 import "../../lib/_1_8pLCD.thingml"
 import "snakeList/_snakeList.thingml"
 
 configuration SnakeCfg 
 
-@debug "true"
-@debug_fifo "true"
+//@debug "true"
+//@debug_fifo "true" //this options, once both uncommented will print on the serial port when the fifo for messages overflows
 {
     
     instance myList : snakeList
@@ -41,8 +58,8 @@ thing ArduinoSketch includes Adafruit_1_8pLCDShieldClient, snakeListClient
 		lcd!drawRect('2+3*'&applex,'2+3*'&appley,2,2,'0xF800')
 	end
 	
-	statechart ArduinoSketchStateChart init Empty {
-		state Empty {
+	statechart ArduinoSketchStateChart init Setup {
+		state Setup {
 			transition -> Menu event lcd?LCDready
 		}
 		state Menu {

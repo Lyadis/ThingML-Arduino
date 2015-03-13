@@ -19,8 +19,8 @@ thing ArduinoMsgs {
 	message usb_print_dec(num: Double);
     message usb_print_num(num: Integer);
     
-    message serial_rx_char(c : Char);
-    message usb_rx_char(c : Char);
+    message serial_rx_char(c : Char); // not implemented
+    message usb_rx_char(c : Char); // not implemented
     
     message setDigitalHigh(pin : UInt8);
 	message setDigitalLow(pin : UInt8);

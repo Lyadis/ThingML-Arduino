@@ -1,12 +1,19 @@
 /**
-We have seen in 1_helloWorld how to make a simple thing.
-Now it is time to design two things that communicate together: this is the ping pong sample!
+File: PingPong.thingml
+
+Fesult:	Once compiled and executed this will display on the serial port "Ping Client Started! Send Ping..." wiat 2sec then "Got pong! Bye"
+
+HardWare required: 	Arduino Uno compatible board
+					
+Feature taken up: 	- timer_start
+					- timeout
+					- (see also timer_cancel)
+					
+TODO: compile and run 
+
+TODO: chronometer: write a chronometer which start when the button is pressed and stop when pressed again (see PingPong to use timer_start and timeout)
 */
 
-/**
-First, define the messages that make sense for this ping pong application...
-Obviously, one ping and one pong message
-*/
 
 import "../../lib/_Arduino.thingml"
 

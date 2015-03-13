@@ -1,11 +1,18 @@
 /**
-file: LED.thingml
-result:	Once compiled and executed this will light a LED plugged in the slot 8
-HardWare required: 	Arduino Uno compatible board
-					a LED
+File: LED.thingml
+
+Result:	Once compiled and executed this will light a LED plugged in the slot 8
+
+HardWare required: 	- Arduino Uno compatible board
+					- a LED
+
+Feature taken up: 	- setOutput
+					- setDigitalHigh
+					- (see also setDigitalLow)
+		
 TODO: compile and run this configuration for the  Arduino
-Right-click on this file (in the Project Explorer on the left) and try:
-ThingML -> Compile Arduino
+	Right-click on this file (in the Project Explorer on the left) and try:
+	ThingML -> Compile Arduino
 */
 
 import "../../lib/_Arduino.thingml"

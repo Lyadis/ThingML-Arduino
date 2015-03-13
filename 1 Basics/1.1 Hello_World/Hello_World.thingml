@@ -1,10 +1,17 @@
 /**
-file: Hello_World.thingml
-result:	Once compiled and executed this will display "Hello World!" then "Bye." on the serial output of your arduino
+File: Hello_World.thingml
+
+Result:	Once compiled and executed this will display "Hello World!" then "Bye." on the serial output of your arduino
+
 HardWare required: Arduino Uno compatible board
+
+Feature taken up: 	- port arduino
+					- serial_print_str
+					- (see also serial_print_dec, serial_print_num)
+
 TODO: compile and run this configuration for the  Arduino
-Right-click on this file (in the Project Explorer on the left) and try:
-ThingML -> Compile Arduino
+	Right-click on this file (in the Project Explorer on the left) and try:
+	ThingML -> Compile Arduino
 */
 import "../../lib/_Arduino.thingml"
 

@@ -1,11 +1,18 @@
 /**
-file: Blink100ms.thingml
-result:	Once compiled and executed this will turn a LED on and off every 100ms
+File: Blink100ms.thingml
+
+Fesult:	Once compiled and executed this will turn a LED on and off every 100ms
+
 HardWare required: 	Arduino Uno compatible board
 					a LED
-					a button (not necessary to run)
+					a button
+					
+Feature taken up: 	- 100ms_interrupt
+					- (see also 4ms_interrupt)
+					
 TODO: compile and run 
-TODO: chronometer: write a chronometer which start when the button is pressed and stop when pressed again
+
+TODO: chronometer: write a chronometer which start when the button is pressed and stop when pressed again (see PingPong to use timer_start and timeout)
 */
 
 import "../../lib/_Arduino.thingml"
