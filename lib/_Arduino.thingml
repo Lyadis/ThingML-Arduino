@@ -124,12 +124,14 @@ uint8_t interrupt_counter = 0;
 	end
 
 	statechart ArduinoSchedulerStateChart init ACTIVE {
-
 		property timers : Long['NB_SOFT_TIMERS'] 
 		property prev_1sec : Long
+		on entry do
+			'Serial.begin(9600);'
+		end
 
 		internal event polling?setup action do
-			'Serial.begin(9600);'
+			//'Serial.print("Serial Initialized");'
 			//'pinMode(7, OUTPUT);'
 			initialize_timer1()
 			prev_1sec = 'millis()' + 1000

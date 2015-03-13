@@ -1,0 +1,53 @@
+/**
+We have seen in 1_helloWorld how to make a simple thing.
+Now it is time to design two things that communicate together: this is the ping pong sample!
+*/
+
+/**
+First, define the messages that make sense for this ping pong application...
+Obviously, one ping and one pong message
+*/
+
+import "../../lib/_Arduino.thingml"
+
+configuration ArduinoSketchCfg {
+	instance arduinoScheduler:  ArduinoScheduler
+	instance application: PingClient
+	connector application.arduino => arduinoScheduler.arduino
+}
+
+
+
+thing PingClient includes ArduinoApplication {
+
+	
+	statechart PingClientMachine init Ping {
+	
+	on entry arduino!serial_print_str("Ping Client Started!\n")
+	
+		state Ping {
+			
+			on entry do
+				arduino!serial_print_str("Send Ping...\n")
+				arduino!timer_start(0,2000)
+			end
+				
+			
+			transition -> Pong event arduino?timeout
+			
+		}
+		
+		state Pong {
+			on entry arduino!serial_print_str("Got pong!\n")
+			
+			transition -> Ping
+			
+		}
+		
+		state Stop {
+			on entry arduino!serial_print_str("Bye.\n")
+		}
+		
+	}
+	
+}
