@@ -23,7 +23,7 @@ With this arduino abstraction layer (_Arduino.thingml) you typically developp in
 
 ![with a lib](https://github.com/Lyadis/ThingML-Arduino/blob/master/img/app-ardu-lcd.png?raw=true)
 
-You can developp or use other library or other abstraction layer for some other hardware (like a shield) and use it this way. Be carefull though, messages in this configuration are broadcast to all things plugged to the port. (in the case of readDigitalResponse or readAnalogResponse, the id parameter will help you to filter and ract only to messages you're supposed to, (use `guard`) (This is true only because the arduino port is in synchrone mod.)
+You can developp or use other library or other abstraction layer for some other hardware (like a shield) and use it this way. Be carefull though, messages in this configuration are broadcast to all things plugged to the port. (in the case of readDigitalResponse or readAnalogResponse, the id parameter will help you to filter and ract only to messages you're supposed to, (use `guard`)
 
 ## A problem you might encounter (and its solution)
 
