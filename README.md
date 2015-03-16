@@ -29,6 +29,10 @@ You can developp or use other library or other abstraction layer for some other 
 
 ![execution order](https://github.com/Lyadis/ThingML-Arduino/blob/master/img/3things.png?raw=true)
 
+There is at the moment no clean way of knowing in which order things are instanciated. 
+Let's say you have as on the picture three things with instruction both on the `on entry` of the statechart and the first state. (And in the case of thing 2 which have a first state which is composite, you have instruction on the `on entry` of the first substate). It's not easy to say what will be executed first. But you can be sure that the all the code of same color will be executed without interruption. 
+So, if you need to instantiate something in a thing and use it in another, you need to be cautious. (see arduino!ready() )
+
 ##ArduinoMsgs
 Most arduino specific feature will be used via messeges over the arduino port of ArduinoApp. 
 Here is the list seen from your arduino app.
