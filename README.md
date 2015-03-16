@@ -37,6 +37,10 @@ So, if you need to instantiate something in a thing and use it in another, you n
 Most arduino specific feature will be used via messeges over the arduino port of ArduinoApp. 
 Here is the list seen from your arduino app.
 
+###Initialization relative message
+####received
+* ready
+
 ###Time relative message
 ####received 
 * 4ms_interrupt
