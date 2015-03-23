@@ -91,10 +91,11 @@ thing ArduinoSketch includes Adafruit_1_8pLCDShieldClient, snakeListClient
 					list!flush()
 					list!addHead(21,26)
 					list!refreshPrintList()
-					newApple()
+					//newApple()
 					arduino!timer_start(timer, speed)
 				end
-				transition -> Control event e : arduino?timeout
+				//transition -> Control event e : arduino?timeout
+				transition -> NewApple event e : arduino?timeout
 			}
 			
 			state Control {
@@ -136,18 +137,19 @@ thing ArduinoSketch includes Adafruit_1_8pLCDShieldClient, snakeListClient
 				transition -> End event e : list?isInSnakeResponse guard (lost or e.b)
 				
 			}
+			
 			state Move {
 				on entry do
 					list!addHead(nextmovex,nextmovey)
 					list!refreshPrintList()
-					
+					/*
 					if (not(nextmovex == applex) or not(nextmovey == appley)) do
 						list!dropTail()
 					end
 					if ((nextmovex == applex) and (nextmovey == appley)) do
 						score = score + 1
 						newApple()
-					end
+					end*/
 					
 					arduino!timer_start(timer, speed)
 				end
@@ -157,8 +159,27 @@ thing ArduinoSketch includes Adafruit_1_8pLCDShieldClient, snakeListClient
 						direction = e.bstate
 					end
 				end
-				transition -> Control event e : arduino?timeout
 				
+				transition -> NewApple event e : arduino?timeout guard ((nextmovex == applex) and (nextmovey == appley)) action do
+						score = score + 1
+				end
+				
+				transition -> Control event e : arduino?timeout guard (not(nextmovex == applex) or not(nextmovey == appley)) action do
+					list!dropTail()
+				end
+			}
+		
+			state NewApple {
+				on entry do
+					applex = '(uint8_t) random(0, 42)'
+					appley = '(uint8_t) random(0, 52)'
+					list!isInSnake(applex, appley)
+				end
+				
+				transition -> NewApple event e : list?isInSnakeResponse guard e.b
+				transition -> Control event e : list?isInSnakeResponse guard not(e.b) action do
+					lcd!drawRect('2+3*'&applex,'2+3*'&appley,2,2,'0xF800')
+				end
 			}
 		
 			state End {
