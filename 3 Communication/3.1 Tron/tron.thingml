@@ -18,8 +18,8 @@ TODO: your own app
 import "../../lib/_1_8pLCD.thingml"
 import "snakeList/_snakeList.thingml"
 
-configuration SnakeCfg 
-
+configuration TronCfg 
+@arduino_stdout "Serial"
 //@debug "true"
 //@debug_fifo "true" //this options, once both uncommented will print on the serial port when the fifo for messages overflows
 {
@@ -28,6 +28,9 @@ configuration SnakeCfg
 	instance myLCD : Adafruit_1_8pLCDShieldShield
     instance arduinoScheduler:  ArduinoScheduler
     instance application: ArduinoSketch	
+    instance myBluff: Bluff
+    
+    
 	connector myList.lcd => myLCD.lcd
 	connector myList.arduino => arduinoScheduler.arduino
 	connector application.lcd => myLCD.lcd
@@ -35,6 +38,7 @@ configuration SnakeCfg
 	connector application.button => myLCD.button
 	connector application.arduino => arduinoScheduler.arduino
 	connector myLCD.arduino => arduinoScheduler.arduino
+	connector myBluff.myPort => myList.myPort
 }
 
 thing ArduinoSketch includes Adafruit_1_8pLCDShieldClient, snakeListClient
@@ -52,11 +56,7 @@ thing ArduinoSketch includes Adafruit_1_8pLCDShieldClient, snakeListClient
 	property lost : Boolean = false
 	property score : UInt8 = 0
 	
-	function newApple() do
-		applex = '(uint8_t) random(0, 42)'
-		appley = '(uint8_t) random(0, 52)'
-		lcd!drawRect('2+3*'&applex,'2+3*'&appley,2,2,'0xF800')
-	end
+	
 	
 	statechart ArduinoSketchStateChart init Setup {
 		state Setup {

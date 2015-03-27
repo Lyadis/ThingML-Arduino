@@ -1,0 +1,264 @@
+import "../../../lib/_1_8pLCD.thingml"
+
+thing snakeListMsgs {
+	message addHead(x : UInt8, y : UInt8);
+	message dropTail();
+	message flush();
+	message refreshPrintList();
+	message isInSnake(x : UInt8, y : UInt8);
+	message isInSnakeResponse(b : Boolean);
+}
+
+thing SerialMsgs 
+{
+	message VPready(id : UInt8);
+	message outAddHead(id : UInt8, x : UInt8, y : UInt8);
+	message outDropTail(id : UInt8, x : UInt8, y : UInt8);
+	message outFlush(id : UInt8);
+	message outRefreshPrintList(id : UInt8);
+	message outIsInSnake(id : UInt8, x : UInt8, y : UInt8);
+	message outIsInSnakeResponse(id : UInt8, b : Boolean);
+}
+
+thing fragment snakeListClient includes snakeListMsgs {
+	required port list {
+		sends addHead, dropTail, flush, refreshPrintList, isInSnake
+		receives isInSnakeResponse
+	}
+}
+
+thing snakeList includes simpleLCDClient, snakeListMsgs, SerialMsgs 
+
+@c_header "
+#include <SoftwareSerial.h>
+#define LISTENER_STATE_IDLE 0
+#define LISTENER_STATE_READING 1
+#define LISTENER_STATE_ESCAPE 2
+#define LISTENER_STATE_ERROR 3
+#define START_BYTE 18
+#define STOP_BYTE 19
+#define ESCAPE_BYTE 125
+#define DEBUGG_SERIAL true
+"
+
+@c_global "
+SoftwareSerial mySerial(2, 3);
+
+byte serialBufferToSend[16];
+uint8_t serialMsgSizeToSend = 0;
+byte serialBuffer[16];
+uint8_t serialMsgSize = 0;
+byte incoming = 0;
+uint8_t serialListenerState = LISTENER_STATE_IDLE;
+
+void forwardByteSerial(byte b) {
+	if((b == START_BYTE) && (b == STOP_BYTE) && (b == ESCAPE_BYTE)) {
+		mySerial.write(ESCAPE_BYTE);
+	}
+	mySerial.write(b);
+}
+
+void forwardMessageSerial(byte * msg, uint8_t size) {
+  
+  mySerial.write(START_BYTE);
+  for(uint8_t i = 0; i < size; i++) {
+    if((msg[i] == START_BYTE) && (msg[i] == STOP_BYTE) && (msg[i] == ESCAPE_BYTE)) {
+      mySerial.write(ESCAPE_BYTE);
+    }
+    mySerial.write(msg[i]);
+    //mySerial.write('0x01');
+    //mySerial.write((byte) 255);
+    if(DEBUGG_SERIAL) {Serial.print(\"[sent] \");}
+    if(DEBUGG_SERIAL) {Serial.print(msg[i]);}
+    if(DEBUGG_SERIAL) {Serial.println();}
+  }
+  mySerial.write(STOP_BYTE);
+}
+
+void printMsg(byte * msg, uint8_t msgSize) {
+  Serial.print(\"[received] msg: \");
+  for (uint8_t i = 0; i < msgSize; i++) {
+    Serial.print(msg[i]);
+  }
+  Serial.println();
+}
+
+void enqueueMsg(byte * msg, uint8_t msgSize) {
+	if ( fifo_byte_available() > msgSize ) {
+
+	  for (uint8_t i = 0; i < msgSize; i++) {
+	    _fifo_enqueue(msg[i]);
+	  }
+	} else {
+		if(DEBUGG_SERIAL) {Serial.print(\"ERROR FIFO OVERFLOW\");}
+	}
+}
+
+void readSerial() {
+  if (mySerial.available()) {
+    if(DEBUGG_SERIAL) {Serial.print(\"[received] \");}
+    incoming = mySerial.read();
+    if(DEBUGG_SERIAL) {Serial.print(incoming);}
+    if(DEBUGG_SERIAL) {Serial.println();}
+    
+    switch(serialListenerState) {
+      case LISTENER_STATE_IDLE:
+        if(incoming == START_BYTE) {
+          serialListenerState = LISTENER_STATE_READING;
+          serialMsgSize = 0;
+        }
+      break;
+      
+      case LISTENER_STATE_READING:
+        if (serialMsgSize >= 16) {
+          serialListenerState = LISTENER_STATE_ERROR;
+        } else {
+          if(incoming == STOP_BYTE) {
+            serialListenerState = LISTENER_STATE_IDLE;
+            
+            if(DEBUGG_SERIAL) {printMsg(serialBuffer, serialMsgSize);}
+            enqueueMsg(serialBuffer, serialMsgSize);
+            
+          } else if (incoming == ESCAPE_BYTE) {
+            serialListenerState = LISTENER_STATE_ESCAPE;
+          } else {
+            serialBuffer[serialMsgSize] = incoming;
+            serialMsgSize++;
+          }
+        }
+      break;
+      
+      case LISTENER_STATE_ESCAPE:
+        serialListenerState = LISTENER_STATE_READING;
+      break;
+      
+      case LISTENER_STATE_ERROR:
+        if(DEBUGG_SERIAL) {Serial.print(\"[Error] Buffer overflow\");}
+        serialListenerState = LISTENER_STATE_IDLE;
+        serialMsgSize = 0;
+      break;
+    }
+  }
+  
+}
+"
+@c_header "
+#define _SNAKE_TAB_SIZE 128 //Impossible to choose a much larger size because of the limitation of memory availiable for variable in arduino Uno
+"
+@c_global "
+uint8_t tabx[_SNAKE_TAB_SIZE];
+uint8_t taby[_SNAKE_TAB_SIZE];
+"
+{
+	provided port list {
+		receives addHead, dropTail, flush, refreshPrintList, isInSnake
+		sends isInSnakeResponse
+	}
+	
+	provided port myPort { //Symetric image of the client port
+		sends VPready, outAddHead, outDropTail, outFlush, outRefreshPrintList, outIsInSnake, outIsInSnakeResponse
+		receives VPready, outAddHead, outDropTail, outFlush, outRefreshPrintList, outIsInSnake, outIsInSnakeResponse
+	}
+	
+	property head : UInt16 = 0
+	property tail : UInt16 = 0
+	property size : UInt16 = '_SNAKE_TAB_SIZE'
+	
+	statechart snakeListSateChart init Empty {
+		state Empty {
+			transition -> Init
+		}
+		
+		state Init {
+			on entry do
+				arduino!serial_print_str("[List] Init\n")
+			end
+			transition -> Idle event e : list?addHead action do
+				'tabx['&head&'] = '&e.x&';'
+				'taby['&head&'] = '&e.y&';'
+				myPort!outAddHead(0, e.x, e.y)
+			end
+		}
+		
+		state Idle {
+			internal event e : list?addHead action do
+				head = (head + 1) % size
+				'tabx['&head&'] = '&e.x&';'
+				'taby['&head&'] = '&e.y&';'
+				myPort!outAddHead(0, e.x, e.y)
+			end
+			
+			internal event e : myPort?outAddHead action do
+				lcd!drawRect('2+3*'&e.x,'2+3*'&e.y,2,2,'0x006F')//we print head
+			end
+			
+			internal event e : list?dropTail action do
+				lcd!drawRect('2+3*tabx['&tail&']','2+3*taby['&tail&']',2,2,'0x0000')//we clear tail
+				tail = (tail + 1) % size
+				myPort!outDropTail(0, 'tabx['&tail&']', 'taby['&tail&']')
+			end
+			
+			internal event e : myPort?outDropTail action do
+				lcd!drawRect('2+3*'&e.x,'2+3*'&e.y,2,2,'0x0000')//we clear tail
+			end
+			
+			internal event e : list?refreshPrintList action do
+				//arduino!serial_print_str("[List] (")
+				//arduino!serial_print_num('tabx['&tail&']')
+				//arduino!serial_print_str(",")
+				//arduino!serial_print_num('taby['&tail&']')
+				//arduino!serial_print_str(")\n")
+				//lcd!drawRect('2+3*tabx['&tail&']','2+3*taby['&tail&']',2,2,'0x0000')//we clear tail
+				lcd!drawRect('2+3*tabx['&head&']','2+3*taby['&head&']',2,2,'0x07E0')//we print head
+				
+			end
+			
+			internal event e : list?isInSnake action do
+				'uint16_t i = '&tail&';
+				boolean found = false;
+				while (i != '&head&') {
+					
+					if (tabx[i] == '&e.x&') {
+						if(taby[i] == '&e.y&') {
+							found = true;
+							break;
+						}
+					}
+					
+					i = (i + 1) % _SNAKE_TAB_SIZE;
+				}
+				'list!isInSnakeResponse('found')
+				if ('found') do
+					arduino!serial_print_str("[List] is in snake")
+				end
+			end
+			
+			//transition -> WaitingIsInSnakeResponse event
+			
+			
+			transition -> Init event e : list?flush action do
+				head = 0
+				tail = 0
+			end
+		}
+	}
+}
+
+thing Bluff includes SerialMsgs {
+	required port myPort { //Symetric image of the client port
+		sends VPready, outAddHead, outDropTail, outFlush, outRefreshPrintList, outIsInSnake, outIsInSnakeResponse
+		receives VPready, outAddHead, outDropTail, outFlush, outRefreshPrintList, outIsInSnake, outIsInSnakeResponse
+	}
+
+	statechart BluffChart init Bluff {
+		state Bluff {
+			internal event e : myPort?VPready action do print "[Bluff]\n" end
+			internal event e : myPort?outAddHead action do print "[Bluff]\n" end
+			internal event e : myPort?outDropTail action do print "[Bluff]\n" end
+			internal event e : myPort?outFlush action do print "[Bluff]\n" end
+			internal event e : myPort?outRefreshPrintList action do print "[Bluff]\n" end
+			internal event e : myPort?outIsInSnake action do print "[Bluff]\n" end
+			internal event e : myPort?outIsInSnakeResponse action do print "[Bluff]\n" end
+		}
+	}
+}
