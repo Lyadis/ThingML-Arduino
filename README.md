@@ -25,6 +25,17 @@ With this arduino abstraction layer (_Arduino.thingml) you typically developp in
 
 You can developp or use other library or other abstraction layer for some other hardware (like a shield) and use it this way. Be carefull though, messages in this configuration are broadcast to all things plugged to the port. (in the case of readDigitalResponse or readAnalogResponse, the id parameter will help you to filter and ract only to messages you're supposed to, (use `guard`)
 
+## Timers
+
+The ATmega328 used by Arduino Uno Board let 3 hardware timers availiable (0, 1 and 2). Only timer1 is 16 bits, both others are 8bits. One problem is, very often two library using the same timer cause troubles. For this reason, the _Arduino.thingml library can use indifferently the three of them. 
+
+Here is a short none exhaustive list of functions and libraries using different timers:
+
+timer0: delay(), millis(), micro()
+timer1: Servo, SoftwareSerial
+timer2: tone()
+
+
 ## A problem you might encounter (and its solution)
 
 ![execution order](https://github.com/Lyadis/ThingML-Arduino/blob/master/img/3things.png?raw=true)
