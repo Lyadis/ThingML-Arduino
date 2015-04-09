@@ -31,9 +31,9 @@ The ATmega328 used by Arduino Uno Board let 3 hardware timers availiable (0, 1 a
 
 Here is a short none exhaustive list of functions and libraries using different timers:
 
-*timer0: delay(), millis(), micro()
-*timer1: Servo, SoftwareSerial
-*timer2: tone()
+* timer0: delay(), millis(), micro()
+* timer1: Servo, SoftwareSerial
+* timer2: tone()
 
 
 ## A problem you might encounter (and its solution)
