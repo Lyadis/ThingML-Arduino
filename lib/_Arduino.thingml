@@ -207,7 +207,7 @@ uint8_t interrupt_counter = 0;
 				arduino!1s_poll()
 			end
 			// Handle serial rx
-			if ('Serial.available()' > 0) arduino!usb_rx_char('(char)Serial.read()')
+			//if ('Serial.available()' > 0) arduino!usb_rx_char('(char)Serial.read()')
 		end
 		
 		internal event e : arduino?timer_start action do

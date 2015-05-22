@@ -1,3 +1,12 @@
+/*
+	ThingML wrapping of adafruit graphics libraries for 1.8" lcd screen.
+	Original libraries are:
+	https://github.com/adafruit/Adafruit-ST7735-Library 
+	https://github.com/adafruit/Adafruit-GFX-Library
+	
+*/
+
+
 import "_Arduino.thingml"
 
 thing Adafruit_1_8pLCDShieldMsgs {
@@ -15,6 +24,7 @@ thing Adafruit_1_8pLCDShieldMsgs {
 	message set_cursor(c : UInt8, l : UInt8);
 	message fillRect(x : UInt16, y : UInt16, w : UInt16, l : UInt16, col : UInt16);
 	message drawRect(x : UInt16, y : UInt16, w : UInt16, l : UInt16, col : UInt16);
+	message drawLine(x1 : UInt16, y1 : UInt16, x2 : UInt16, y2 : UInt16, col : UInt16);
 	
 }
 
@@ -29,7 +39,7 @@ thing fragment Adafruit_1_8pLCDShieldClient includes Adafruit_1_8pLCDShieldMsgs,
 	required port lcd 
 	@sync_send "true" // Do not queue thos message, send them directly to the LCD. We should not send them from interrupt routines. 
 	{
-		sends print_num, print_dec, print_str, clear, set_cursor, set_bgcolor, fillRect, drawRect
+		sends print_num, print_dec, print_str, clear, set_cursor, set_bgcolor, fillRect, drawRect, drawLine
 		receives LCDready
 	}
 	
@@ -39,7 +49,7 @@ thing fragment simpleLCDClient includes Adafruit_1_8pLCDShieldMsgs, ArduinoMsgs,
 	required port lcd 
 	@sync_send "true" // Do not queue thos message, send them directly to the LCD. We should not send them from interrupt routines. 
 	{
-		sends print_num, print_dec, print_str, clear, set_cursor, set_bgcolor, fillRect, drawRect
+		sends print_num, print_dec, print_str, clear, set_cursor, set_bgcolor, fillRect, drawRect, drawLine
 		receives LCDready
 	}
 }
@@ -75,7 +85,7 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 	}
 	
 	provided port lcd {
-		receives print_num, print_dec, print_str, clear, set_cursor, set_bgcolor, fillRect, drawRect
+		receives print_num, print_dec, print_str, clear, set_cursor, set_bgcolor, fillRect, drawRect, drawLine
 		sends LCDready
 	}
 
@@ -102,7 +112,7 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 			tft.setTextColor(0xFFFF);'
 		end
 			transition -> Idle action do
-			arduino!serial_print_str("[LCD shield] Ready\n")
+			//arduino!serial_print_str("[LCD shield] Ready\n")
 			lcd!LCDready()
 			end
 		}
@@ -143,6 +153,7 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 			internal event e : lcd?set_cursor action 'tft.setCursor('&e.c&', '&e.l&');'
 			internal event e : lcd?fillRect action 'tft.fillRect('&e.x&','&e.y&','&e.w&','&e.l&','&e.col&');'
 			internal event e : lcd?drawRect action 'tft.drawRect('&e.x&','&e.y&','&e.w&','&e.l&','&e.col&');'
+			internal event e : lcd?drawLine action 'tft.drawLine('&e.x1&','&e.y1&','&e.x2&','&e.y2&','&e.col&');'
 		
 		}
 	}
