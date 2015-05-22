@@ -47,8 +47,8 @@ So, if you need to instantiate something in a thing and use it in another, you n
 ##1.8" LCD screen
 
 C++ Libraries required:
-https://github.com/adafruit/Adafruit-ST7735-Library 
-https://github.com/adafruit/Adafruit-GFX-Library
+ * https://github.com/adafruit/Adafruit-ST7735-Library 
+ * https://github.com/adafruit/Adafruit-GFX-Library
 
 ##ArduinoMsgs
 Most arduino specific feature will be used via messeges over the arduino port of ArduinoApp. 
