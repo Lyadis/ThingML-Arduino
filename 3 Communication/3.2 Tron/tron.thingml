@@ -246,20 +246,24 @@ thing Tron includes Adafruit_1_8pLCDShieldClient, TronMsgs
 		}
 		state Waiting {
 			on entry do
+				
+				color[0] = '0xF800'
+				color[1] = '0x001F'
+				color[2] = '0x3FE0'
 			
 				'SWS_trace("[Tron] Waiting\n");'
 				lcd!clear()
-                lcd!drawRect(1,1,127,157,'0xFFFF')
-                lcd!set_cursor(16,68)
+                //lcd!drawRect(1,1,127,157,'0xFFFF')
+                lcd!drawRect(1,1,127,157,color[myID])
+                lcd!set_cursor(16,58)
                 lcd!print_str("Welcome to Tron!")
-                lcd!set_cursor(12,78)
+                lcd!set_cursor(12,68)
                 lcd!print_str("Press the joystick")
-                lcd!set_cursor(40,88)
-                lcd!print_str("to start")
-				
-				color[0] = '0x001F'
-				color[1] = '0xF800'
-				color[2] = '0x3FE0'
+                lcd!set_cursor(35,78)
+                lcd!print_str("to start.")
+                lcd!set_cursor(35,88)
+                lcd!print_str("You are ")
+                lcd!fillRect(80, 88, 8, 8, color[myID])
 				
 				hasLost[0] = false
 				hasLost[1] = false
@@ -277,7 +281,7 @@ thing Tron includes Adafruit_1_8pLCDShieldClient, TronMsgs
 				nbReady = 0
 				'SWS_trace("[Tron] go to Game\n");'
 				lcd!clear()
-                lcd!drawRect(1,1,127,157,'0xFFFF')
+                lcd!drawRect(1,1,127,157,color[myID])
                
                 lcd!drawRect('2+3*'&headX,'2+3*'&headY,2,2,color[myID])
 				TronPort!addHead(headX, headY, myID)
@@ -288,7 +292,7 @@ thing Tron includes Adafruit_1_8pLCDShieldClient, TronMsgs
 			on entry do
 				'SWS_trace("[Tron] Rendez vous\n");'
 				lcd!clear()
-                lcd!drawRect(1,1,127,157,'0xFFFF')
+                lcd!drawRect(1,1,127,157,color[myID])
                 lcd!set_cursor(12,78)
                 lcd!print_str("Waiting for others")
 				nbReady = nbReady + 1
@@ -300,7 +304,7 @@ thing Tron includes Adafruit_1_8pLCDShieldClient, TronMsgs
 				nbReady = 0
 				'SWS_trace("[Tron] go to Game\n");'
 				lcd!clear()
-                lcd!drawRect(1,1,127,157,'0xFFFF')
+                lcd!drawRect(1,1,127,157,color[myID])
                
                 lcd!drawRect('2+3*'&headX,'2+3*'&headY,2,2,color[myID])
 				TronPort!addHead(headX, headY, myID)
@@ -414,7 +418,7 @@ thing Tron includes Adafruit_1_8pLCDShieldClient, TronMsgs
 			on entry do
 				'SWS_trace("[Tron] Defeat\n");'
 				lcd!clear()
-                lcd!drawRect(1,1,127,157,'0xFFFF')
+                lcd!drawRect(1,1,127,157,color[myID])
                 lcd!set_cursor(45,78)
                 lcd!print_str("Defeat!")
 			end
@@ -431,7 +435,7 @@ thing Tron includes Adafruit_1_8pLCDShieldClient, TronMsgs
 				'SWS_trace("[Tron] Victor\ny");'
 				displayTab()
 				lcd!clear()
-                lcd!drawRect(1,1,127,157,'0xFFFF')
+                lcd!drawRect(1,1,127,157,color[myID])
                 lcd!set_cursor(44,78)
                 lcd!print_str("Victory!")
 			end

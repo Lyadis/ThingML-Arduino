@@ -150,7 +150,7 @@ uint8_t interrupt_counter = 0;
 	
 	function initialize_timer1() do
 		'// Store the instance in a global variable so that the interrupt routine can use it
-		 _YunScheduler_instance = _instance;
+		 _ArduinoScheduler_instance = _instance;
 		 
 		 // Run timer1 interrupt up counting at 16MHz 
 		 TCCR1A = 0;
@@ -163,7 +163,7 @@ uint8_t interrupt_counter = 0;
 	
 	function timer1_compare_interrupt() 
 	@c_prototype "SIGNAL(TIMER1_OVF_vect)"
-	@c_instance_var_name "_YunScheduler_instance"
+	@c_instance_var_name "_ArduinoScheduler_instance"
 	do
 		'TCNT1 = 1535;'
 		'interrupt_counter++;'
