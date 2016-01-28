@@ -15,20 +15,21 @@ TODO: your own app
 
 import "../../lib/_1_8pLCD.thingml"
 
-configuration ArduinoSketchCfg {
-    
+protocol Timer;
+
+configuration ArduinoSketchCfg 
+@arduino_stdout "Serial"
+{
     instance application: ArduinoSketch	
 	instance lcd : Adafruit_1_8pLCDShieldShield
-    instance arduinoScheduler:  ArduinoScheduler
+
 	connector application.button => lcd.button
 	connector application.lcd => lcd.lcd
-	connector application.arduino => arduinoScheduler.arduino
-	connector lcd.arduino => arduinoScheduler.arduino
+
+	connector lcd.timer over Timer
 }
 
-thing ArduinoSketch includes Adafruit_1_8pLCDShieldClient
-
-{
+thing ArduinoSketch includes Adafruit_1_8pLCDShieldClient {
 	
 	statechart ArduinoSketchStateChart init Init {
 		state Init {
@@ -37,7 +38,7 @@ thing ArduinoSketch includes Adafruit_1_8pLCDShieldClient
 
 		state OFF {
 			on entry do
-				arduino!serial_print_str("[Client] LCD Init\n")
+				print "[Client] LCD Init\n"
                 lcd!clear()
                 
 			end
@@ -45,7 +46,7 @@ thing ArduinoSketch includes Adafruit_1_8pLCDShieldClient
 		}
 		state DrawRect {
 			on entry do
-				arduino!serial_print_str("[Client] DrawRect\n")
+				print "[Client] DrawRect\n"
 				lcd!drawRect(1,1,126,158,'0xFFFF')
 			end
 			transition -> ON
@@ -53,9 +54,9 @@ thing ArduinoSketch includes Adafruit_1_8pLCDShieldClient
 
 		state ON {
 	    	internal event e : button?button_state_change action do
-                arduino!serial_print_str("Button: ")
-                arduino!serial_print_num(e.bstate)
-                arduino!serial_print_str("\n")
+                print "Button: "
+                print e.bstate
+                print "\n"
                 
                 lcd!fillRect(10,10,100,10, '0x0000')
                 lcd!set_cursor(10,10)

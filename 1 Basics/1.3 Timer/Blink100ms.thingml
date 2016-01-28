@@ -34,11 +34,14 @@ thing ArduinoSketch includes ArduinoApplication
 
 		state OFF {
 			on entry arduino!setDigitalHigh(LED)
-			transition -> ON event arduino?100ms_interrupt //handeling of the arduino 100ms interrupt
+			transition -> ON event arduino?100ms_interrupt 
+			//handeling of the arduino 100ms interrupt
 		}
 		state ON {
 			on entry arduino!setDigitalLow(LED)
 			transition -> OFF event arduino?100ms_interrupt
+			//handeling of the arduino 100ms interrupt
 		}
 	}
 }
+

@@ -7,7 +7,7 @@
 */
 
 
-import "_Arduino.thingml"
+import "_Datatypes.thingml"
 
 thing Adafruit_1_8pLCDShieldMsgs {
 	
@@ -18,7 +18,7 @@ thing Adafruit_1_8pLCDShieldMsgs {
 	
 	message set_bgcolor(color : UInt8);
 	message print_str(msg: String);
-	message print_dec(num: Double);
+	message print_dec(num: Float);
     message print_num(num: Integer);
 	message clear();
 	message set_cursor(c : UInt8, l : UInt8);
@@ -28,7 +28,7 @@ thing Adafruit_1_8pLCDShieldMsgs {
 	
 }
 
-thing fragment Adafruit_1_8pLCDShieldClient includes Adafruit_1_8pLCDShieldMsgs, ArduinoApplication {
+thing fragment Adafruit_1_8pLCDShieldClient includes Adafruit_1_8pLCDShieldMsgs {
 
 	required port button 
 	{
@@ -45,7 +45,7 @@ thing fragment Adafruit_1_8pLCDShieldClient includes Adafruit_1_8pLCDShieldMsgs,
 	
 }
 
-thing fragment simpleLCDClient includes Adafruit_1_8pLCDShieldMsgs, ArduinoMsgs, ArduinoApplication {
+thing fragment simpleLCDClient includes Adafruit_1_8pLCDShieldMsgs {
 	required port lcd 
 	@sync_send "true" // Do not queue thos message, send them directly to the LCD. We should not send them from interrupt routines. 
 	{
@@ -54,7 +54,7 @@ thing fragment simpleLCDClient includes Adafruit_1_8pLCDShieldMsgs, ArduinoMsgs,
 	}
 }
 
-thing Adafruit_1_8pLCDShieldShield includes ArduinoMsgs, Adafruit_1_8pLCDShieldMsgs, ThingMLSchedulerMsg 
+thing Adafruit_1_8pLCDShieldShield includes Adafruit_1_8pLCDShieldMsgs, TimerMsgs 
 @c_header "
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
@@ -70,11 +70,9 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 "
 {
 
-	required port arduino 
-	@sync_send "true"
+	required port timer 
 	{
-		sends setInput, readAnalog, serial_print_str
-		receives 100ms_interrupt, readAnalogResponse, ready
+		receives 100ms_tic
 	}
 
 	provided port button
@@ -101,13 +99,13 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 			//tft.setTextColor(0xFFFF);'
 		end
 		state Empty {
-			transition -> Setup event e : arduino?ready
+			transition -> Setup
 		}
 		
 		state Setup {
 		on entry do
-			arduino!setInput(bpin)
-			'tft.initR(INITR_BLACKTAB);
+			'pinMode('&bpin&', INPUT);
+			tft.initR(INITR_BLACKTAB);
 			tft.fillScreen(0x0000);
 			tft.setTextColor(0xFFFF);'
 		end
@@ -122,12 +120,8 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 		
 			property bstate : UInt8 
 			
-			internal event arduino?100ms_interrupt action do
-				arduino!readAnalog(bpin)
-			end
-			
-			internal event e : arduino?readAnalogResponse action do
-				'int joystickState ='&e.res&';
+			internal event timer?100ms_tic action do
+				'int joystickState = digitalRead('&bpin&');
 				int bstatetmp = 0;
 			    if (joystickState < 50) {bstatetmp = 1;}
 			    else if (joystickState < 150) {bstatetmp = 2;}

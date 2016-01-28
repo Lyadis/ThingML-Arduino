@@ -116,9 +116,10 @@ uint8_t interrupt_counter = 0;
 		
 	end
 	
-	/*
+	
 	function initialize_timer0() do
-		'// Store the instance in a global variable so that the interrupt routine can use it
+		'// Store the instance in a global variable 
+		//  so that the interrupt routine can use it
 		_ArduinoScheduler_instance = _instance;
 		
 		// Run timer0 interrupt up counting at 250kHz 
@@ -147,7 +148,7 @@ uint8_t interrupt_counter = 0;
 		
 	end
 	
-	
+	/*
 	function initialize_timer1() do
 		'// Store the instance in a global variable so that the interrupt routine can use it
 		 _ArduinoScheduler_instance = _instance;
